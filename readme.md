@@ -13,7 +13,6 @@ This project is fork from  [Charliex2/laravel-deploy-x](https://github.com/charl
 
 ## Default Artisan Commands
 ```
-php artisan migrate 
 php artisan cache:clear 
 php artisan route:cache
 php artisan config:cache
