@@ -1,12 +1,10 @@
-
 #!/bin/bash
 
 SSH_USER=$1
 SSH_HOST=$2
 SSH_PORT=$3
 PATH_SOURCE=$4
-OWNER=$5
-COMMANDS=$6
+PHP_CMD=$5
 
 mkdir -p /root/.ssh
 ssh-keyscan -H "$SSH_HOST" >> /root/.ssh/known_hosts
@@ -43,18 +41,9 @@ rsync --progress -avzh \
 if [ $? -eq 0 ]
 then
 	echo $'\n' "------ SYNC SUCCESSFUL! -----------------------" $'\n'
-	echo $'\n' "------ RELOADING PERMISSION -------------------" $'\n'
+	echo $'\n' "------ RUNNING COMMANDS -----------------------" $'\n'
 
-	ssh -i /root/.ssh/id_rsa -t $SSH_USER@$SSH_HOST "sudo chown -R $OWNER:$OWNER $PATH_SOURCE"
-	ssh -i /root/.ssh/id_rsa -t $SSH_USER@$SSH_HOST "sudo chmod 775 -R $PATH_SOURCE"
-	ssh -i /root/.ssh/id_rsa -t $SSH_USER@$SSH_HOST "sudo chmod 777 -R $PATH_SOURCE/storage"
-	ssh -i /root/.ssh/id_rsa -t $SSH_USER@$SSH_HOST "sudo chmod 777 -R $PATH_SOURCE/public"
-	ssh -i /root/.ssh/id_rsa -t $SSH_USER@$SSH_HOST "cd $PATH_SOURCE && php artisan cache:clear && php artisan route:cache && php artisan config:cache"
-
-	if [ ! -z "$COMMANDS" ];
-	then
-		ssh -i /root/.ssh/id_rsa -t $SSH_USER@$SSH_HOST "cd $PATH_SOURCE && $COMMANDS"
-	fi
+	ssh -i /root/.ssh/id_rsa -t $SSH_USER@$SSH_HOST "cd $PATH_SOURCE && $PHP_CMD artisan cache:clear && $PHP_CMD artisan route:cache && $PHP_CMD artisan config:cache && $PHP_CMD artisan migrate --force"
 
 	echo $'\n' "------ CONGRATS! DEPLOY SUCCESSFUL!!! ---------" $'\n'
 	exit 0
